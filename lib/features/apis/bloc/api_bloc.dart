@@ -1,10 +1,9 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:bloc/bloc.dart';
-import 'package:http/http.dart' as http;
 import 'package:meta/meta.dart';
 import 'package:restapibloc/features/apis/models/api_data_model.dart';
+import 'package:restapibloc/features/apis/repos/post_repo.dart';
 
 part 'api_event.dart';
 part 'api_state.dart';
@@ -12,26 +11,29 @@ part 'api_state.dart';
 class ApiBloc extends Bloc<ApiEvent, ApiState> {
   ApiBloc() : super(ApiInitial()) {
     on<ApiInitialFetchEvent>(apiInitialFetchEvent);
+    on<PostAddEvent>(postAddEvent);
   }
 
   FutureOr<void> apiInitialFetchEvent(
       ApiInitialFetchEvent event, Emitter<ApiState> emit) async {
-    var client = http.Client();
-    List<ApiDataModel> apis = [];
+    emit(ApiFetchingLoadingState());
     try {
-      var response = await client.get(
-        Uri.parse('https://jsonplaceholder.typicode.com/posts'),
-      );
-      List result = jsonDecode(response.body);
-      for (int i = 0; i < result.length; i++) {
-        ApiDataModel api =
-            ApiDataModel.fromMap(result[i] as Map<String, dynamic>);
-        apis.add(api);
-      }
+      List<ApiDataModel> apis = await PostRepp.fetchPost();
 
       emit(ApiFetchingSuccessful(apis: apis));
     } catch (e) {
       print(e.toString());
+    }
+  }
+
+  FutureOr<void> postAddEvent(
+      PostAddEvent event, Emitter<ApiState> emit) async {
+    bool sucess = await PostRepp.addPost();
+    print(sucess);
+    if (sucess) {
+      emit(PostAdditionSuccessState());
+    } else {
+      emit(PostAdditionErrorState());
     }
   }
 }

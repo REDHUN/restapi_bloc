@@ -24,6 +24,14 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: const Text("Api Home Page"),
       ),
+      floatingActionButton: FloatingActionButton(
+          child: const Icon(
+            Icons.add,
+            color: Colors.white,
+          ),
+          onPressed: () {
+            apiBloc.add(PostAddEvent());
+          }),
       body: BlocConsumer<ApiBloc, ApiState>(
           bloc: apiBloc,
           listenWhen: (previous, current) => current is ApiActionState,
@@ -31,19 +39,28 @@ class _HomePageState extends State<HomePage> {
           listener: (context, state) {},
           builder: (context, state) {
             switch (state.runtimeType) {
+              case ApiFetchingLoadingState:
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
               case ApiFetchingSuccessful:
                 final successState = state as ApiFetchingSuccessful;
                 return Container(
                   child: ListView.builder(
+                      scrollDirection: Axis.vertical,
+                      shrinkWrap: true,
                       itemCount: successState.apis.length,
                       itemBuilder: (context, index) {
                         return Container(
-                          color: Color.fromARGB(255, 206, 194, 194),
-                          margin: EdgeInsets.all(10),
-                          padding: EdgeInsets.all(10),
+                          color: const Color.fromARGB(255, 206, 194, 194),
+                          margin: const EdgeInsets.all(10),
+                          padding: const EdgeInsets.all(10),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [Text(successState.apis[index].title)],
+                            children: [
+                              Text(successState.apis[index].title),
+                              Text(successState.apis[index].body),
+                            ],
                           ),
                         );
                       }),

@@ -4,3 +4,5 @@ part of 'api_bloc.dart';
 abstract class ApiEvent {}
 
 class ApiInitialFetchEvent extends ApiEvent {}
+
+class PostAddEvent extends ApiEvent {}
